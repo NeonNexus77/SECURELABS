@@ -15,7 +15,7 @@ const TADashboard = () => {
     { id: "G-03", lead: "Sneha", target: "192.168.1.22", status: "Idle", bugs: 0, progress: "0%", score: null },
     { id: "G-04", lead: "Amit", target: "192.168.1.09", status: "Active", bugs: 8, progress: "95%", score: null },
   ]);
-
+  const attacks = ["Attack 1", "Attack 2", "Attack 3", "Attack 4"];
   const handleGradeSubmit = (e) => {
     e.preventDefault();
     const marks = e.target.marks.value;
@@ -73,7 +73,7 @@ const TADashboard = () => {
             </div>
           </div>
 
-          <table className="w-full text-left">
+          {/* <table className="w-full text-left">
             <thead className="bg-slate-800/50 text-slate-400 text-xs uppercase tracking-widest">
               <tr>
                 <th className="px-6 py-4 font-semibold">Group</th>
@@ -112,7 +112,51 @@ const TADashboard = () => {
                 </tr>
               ))}
             </tbody>
-          </table>
+          </table> */}
+          <table className="w-full text-left border-collapse">
+  <thead className="bg-slate-800/50 text-slate-400 text-[10px] uppercase tracking-widest font-black">
+    <tr>
+      <th className="px-6 py-4">Group</th>
+      <th className="px-6 py-4">Target IP</th>
+      <th className="px-6 py-4 text-center">Attack Checklist</th> {/* Updated Header */}
+      <th className="px-6 py-4">Grade</th>
+      <th className="px-6 py-4 text-right">Action</th>
+    </tr>
+  </thead>
+  <tbody className="divide-y divide-slate-800/50">
+    {groups.map((group) => (
+      <tr key={group.id} className="hover:bg-slate-800/20 transition-all group">
+        <td className="px-6 py-5">
+          <div className="font-bold text-blue-400">{group.id}</div>
+          <div className="text-[10px] text-slate-500">{group.lead}</div>
+        </td>
+        <td className="px-6 py-5 font-mono text-xs text-slate-400">{group.target}</td>
+        
+        {/* Checkbox Column */}
+        <td className="px-6 py-5">
+          <div className="flex justify-center gap-3">
+            {attacks.map((attack) => (
+              <label key={attack} className="flex flex-col items-center gap-1 cursor-pointer">
+                <input 
+                  type="checkbox" 
+                  className="w-4 h-4 rounded border-slate-700 bg-slate-900 text-blue-600 focus:ring-blue-500 focus:ring-offset-slate-900"
+                />
+                <span className="text-[8px] font-black text-slate-500 uppercase">{attack}</span>
+              </label>
+            ))}
+          </div>
+        </td>
+
+        <td className="px-6 py-5 italic text-slate-500 text-xs">{group.grade}</td>
+        <td className="px-6 py-5 text-right">
+          <button className="bg-blue-600/10 hover:bg-blue-600 text-blue-400 hover:text-white border border-blue-600/20 px-4 py-2 rounded-xl text-xs font-bold transition-all">
+            Review & Grade
+          </button>
+        </td>
+      </tr>
+    ))}
+  </tbody>
+</table>
         </div>
 
         {/* --- GRADING MODAL --- */}

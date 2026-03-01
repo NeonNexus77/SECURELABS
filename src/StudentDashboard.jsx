@@ -77,8 +77,8 @@ const StudentDashboard = () => {
 
               {/* Fake Terminal View */}
               <div className="bg-black/80 rounded-2xl p-5 font-mono text-sm h-48 border border-slate-800 text-emerald-500 shadow-inner overflow-hidden">
-                <p className="opacity-50 tracking-tighter">SECURE-LAB OS v4.2.0-STABLE</p>
-                <p className="mt-2 text-slate-300">{`> Initializing audit on ${targetIp || '0.0.0.0'}...`}</p>
+                {/* <p className="opacity-50 tracking-tighter">SECURE-LAB OS v4.2.0-STABLE</p> */}
+                <p className="mt-2 text-slate-300">{`> reports on attack  ${targetIp || '0.0.0.0'}...`}</p>
                 {scanning && (
                   <div className="mt-2 space-y-1">
                     <p className="animate-pulse text-blue-400 font-bold">{`> [SCANNING] Checking open ports...`}</p>
@@ -91,25 +91,25 @@ const StudentDashboard = () => {
             </div>
 
             {/* TA Feedback Section */}
-            <div className="bg-emerald-500/5 border border-emerald-500/20 p-6 rounded-3xl backdrop-blur-sm">
+            {/* <div className="bg-emerald-500/5 border border-emerald-500/20 p-6 rounded-3xl backdrop-blur-sm">
               <h3 className="text-emerald-400 font-bold flex items-center gap-2 mb-2 uppercase text-xs tracking-widest">
                 <CheckCircle size={16} /> TA Feedback
               </h3>
               <p className="text-slate-300 italic text-sm">"{assessmentResults.feedback}"</p>
-            </div>
+            </div> */}
           </div>
 
           {/* Right Column: Logging Form */}
           <div className="bg-slate-900/40 border border-slate-800 p-8 rounded-[2.5rem] backdrop-blur-md h-fit">
             <h2 className="text-xl font-bold mb-6 flex items-center gap-2 text-white italic tracking-tight">
-              <AlertTriangle size={20} className="text-yellow-500" /> Log Vulnerability
+              <AlertTriangle size={20} className="text-yellow-500" /> Log Attack information
             </h2>
             <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
               <input type="text" placeholder="Attack Type (e.g. SQLi)" className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-sm focus:border-blue-500 outline-none text-white" />
               <select className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-sm text-slate-300">
-                <option>Severity: Critical</option>
-                <option>Severity: High</option>
-                <option>Severity: Medium</option>
+                <option>Attack: A</option>
+                <option>Attack: B</option>
+                <option>Attack: C</option>
               </select>
               <textarea placeholder="Paste your PoC payload or description..." className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-sm h-32 focus:border-blue-500 outline-none text-white resize-none"></textarea>
               <button className="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-xl font-black text-sm transition-all shadow-xl shadow-blue-900/30 uppercase tracking-widest">
