@@ -281,6 +281,5 @@ server.listen(PORT, () => {
     console.log(`🔌 WebSocket: ws://localhost:${PORT} (live scan)`);
     console.log(`🔐 Auth API:  POST http://localhost:${PORT}/api/auth/signup`);
     console.log(`🔐 Auth API:  POST http://localhost:${PORT}/api/auth/login`);
-
     console.log(`❤️  Health:    GET  http://localhost:${PORT}/api/health\n`);
 });
