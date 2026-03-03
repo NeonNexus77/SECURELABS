@@ -1,4 +1,4 @@
-# SECUREIX (SecureLabs) - How to Run the Project
+# SECURELABS How to Run the Project
 
 This guide provides step-by-step instructions on how to set up and run the **SECURELABS** project from scratch on a new system.
 

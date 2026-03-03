@@ -1,7 +1,7 @@
 version: '3.8'
 
-services:
-  # ========== BACKEND ==========
+services: 
+  #-------backend----------
   backend:
     build: ./backend
     container_name: securelab-backend
@@ -17,7 +17,7 @@ services:
     networks:
       - securelab-net
 
-  # ========== FRONTEND ==========
+  #-------frontend----------
   frontend:
     build:
       context: ./frontend
@@ -32,7 +32,7 @@ services:
     networks:
       - securelab-net
 
-  # ========== MONGODB ==========
+  #-------mongodb----------
   mongo:
     image: mongo:7
     container_name: securelab-mongo
