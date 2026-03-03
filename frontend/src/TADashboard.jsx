@@ -1,50 +1,72 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Users, ShieldAlert, Clock, Search, LayoutDashboard, Database, LogOut, Award, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from './AuthContext';
+import API_BASE from './api';
 
 const TADashboard = () => {
   const navigate = useNavigate();
-  
+  const { user, token, logout } = useAuth();
+
   // State for Grading Modal
   const [selectedGroup, setSelectedGroup] = useState(null);
+  const [groups, setGroups] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // Simulated Data for Student Groups
-  const [groups, setGroups] = useState([
-    { id: "G-01", lead: "Ayush", target: "192.168.1.10", status: "Active", bugs: 5, progress: "80%", score: null },
-    { id: "G-02", lead: "Rahul", target: "192.168.1.15", status: "Active", bugs: 2, progress: "40%", score: null },
-    { id: "G-03", lead: "Sneha", target: "192.168.1.22", status: "Idle", bugs: 0, progress: "0%", score: null },
-    { id: "G-04", lead: "Amit", target: "192.168.1.09", status: "Active", bugs: 8, progress: "95%", score: null },
-  ]);
-  const attacks = ["Attack 1", "Attack 2", "Attack 3", "Attack 4"];
-  const handleGradeSubmit = (e) => {
+  // Fetch groups from DB on mount
+  useEffect(() => {
+    fetchGroups();
+  }, []);
+
+  const fetchGroups = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/api/groups`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (data.success) setGroups(data.groups);
+    } catch (err) { /* silent */ }
+    finally { setLoading(false); }
+  };
+
+  const handleGradeSubmit = async (e) => {
     e.preventDefault();
     const marks = e.target.marks.value;
-    
-    // Update local state for marks directly in the groups array
-    setGroups(groups.map(g => g.id === selectedGroup.id ? { ...g, score: marks } : g));
-    
-    alert(`Marks for ${selectedGroup.id} submitted: ${marks}/100`);
+    const feedback = e.target.feedback?.value || '';
+
+    try {
+      const res = await fetch(`${API_BASE}/api/groups/${selectedGroup._id}/grade`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ score: parseInt(marks), feedback })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setGroups(groups.map(g => g._id === selectedGroup._id ? { ...g, score: marks, feedback } : g));
+        alert(`Grade saved for ${selectedGroup.groupId}: ${marks}/100`);
+      }
+    } catch (err) { alert('Failed to save grade'); }
     setSelectedGroup(null);
   };
 
   return (
     <div className="min-h-screen bg-[#020617] text-slate-200 flex font-sans relative">
-      
+
       {/* Sidebar */}
       <aside className="w-64 bg-slate-900/80 border-r border-slate-800 p-6 flex flex-col justify-between">
         <div>
           <div className="text-2xl font-black tracking-tighter text-blue-500 mb-10 italic">SECURE<span className="text-white">LAB.</span></div>
           <nav className="flex flex-col gap-2">
-            <NavItem icon={<LayoutDashboard size={20}/>} label="TA Overview" active />
-            <NavItem icon={<Users size={20}/>} label="Manage Groups" />
+            <NavItem icon={<LayoutDashboard size={20} />} label="TA Overview" active />
+            <NavItem icon={<Users size={20} />} label="Manage Groups" />
             {/* <NavItem icon={<Database size={20}/>} label="Lab Inventory" /> */}
           </nav>
         </div>
-        <button 
-          onClick={() => navigate('/login')}
+        <button
+          onClick={() => { logout(); navigate('/login'); }}
           className="flex items-center gap-3 px-4 py-3 text-red-400 hover:bg-red-500/10 rounded-xl transition-all font-medium"
         >
-          <LogOut size={20}/> Logout
+          <LogOut size={20} /> Logout
         </button>
       </aside>
 
@@ -56,7 +78,7 @@ const TADashboard = () => {
             <p className="text-slate-500 mt-1 font-medium">Lab Session #04 | Network Security Assessment</p>
           </div>
           <div className="flex gap-4">
-            <StatBox icon={<Users className="text-blue-400"/>} label="Total Groups" value="12" />
+            <StatBox icon={<Users className="text-blue-400" />} label="Total Groups" value="12" />
             {/* <StatBox icon={<ShieldAlert className="text-red-400"/>} label="Critical Alerts" value="05" /> */}
           </div>
         </header>
@@ -73,7 +95,7 @@ const TADashboard = () => {
             </div>
           </div>
 
-          {/* <table className="w-full text-left">
+          <table className="w-full text-left">
             <thead className="bg-slate-800/50 text-slate-400 text-xs uppercase tracking-widest">
               <tr>
                 <th className="px-6 py-4 font-semibold">Group</th>
@@ -84,15 +106,17 @@ const TADashboard = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800">
-              {groups.map((group) => (
-                <tr key={group.id} className="hover:bg-slate-800/30 transition-colors text-sm">
+              {groups.length === 0 && !loading ? (
+                <tr><td colSpan="5" className="px-6 py-8 text-center text-slate-500 italic">No groups found. Faculty can seed groups from the API.</td></tr>
+              ) : groups.map((group) => (
+                <tr key={group._id || group.groupId} className="hover:bg-slate-800/30 transition-colors text-sm">
                   <td className="px-6 py-4">
-                    <div className="font-bold text-blue-400">{group.id}</div>
+                    <div className="font-bold text-blue-400">{group.groupId}</div>
                     <div className="text-xs text-slate-500">{group.lead}</div>
                   </td>
                   <td className="px-6 py-4 font-mono text-xs text-slate-400">{group.target}</td>
                   <td className="px-6 py-4">
-                    <span className="bg-red-500/10 text-red-400 px-3 py-1 rounded-full text-xs font-bold border border-red-500/20">{group.bugs} Vulns</span>
+                    <span className={`px-3 py-1 rounded-full text-xs font-bold border ${group.status === 'Active' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-slate-500/10 text-slate-400 border-slate-500/20'}`}>{group.status}</span>
                   </td>
                   <td className="px-6 py-4">
                     {group.score ? (
@@ -102,7 +126,7 @@ const TADashboard = () => {
                     )}
                   </td>
                   <td className="px-6 py-4 text-center">
-                    <button 
+                    <button
                       onClick={() => setSelectedGroup(group)}
                       className="bg-blue-600/10 text-blue-400 hover:bg-blue-600 hover:text-white border border-blue-500/30 px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 mx-auto"
                     >
@@ -112,51 +136,7 @@ const TADashboard = () => {
                 </tr>
               ))}
             </tbody>
-          </table> */}
-          <table className="w-full text-left border-collapse">
-  <thead className="bg-slate-800/50 text-slate-400 text-[10px] uppercase tracking-widest font-black">
-    <tr>
-      <th className="px-6 py-4">Group</th>
-      <th className="px-6 py-4">Target IP</th>
-      <th className="px-6 py-4 text-center">Attack Checklist</th> {/* Updated Header */}
-      <th className="px-6 py-4">Grade</th>
-      <th className="px-6 py-4 text-right">Action</th>
-    </tr>
-  </thead>
-  <tbody className="divide-y divide-slate-800/50">
-    {groups.map((group) => (
-      <tr key={group.id} className="hover:bg-slate-800/20 transition-all group">
-        <td className="px-6 py-5">
-          <div className="font-bold text-blue-400">{group.id}</div>
-          <div className="text-[10px] text-slate-500">{group.lead}</div>
-        </td>
-        <td className="px-6 py-5 font-mono text-xs text-slate-400">{group.target}</td>
-        
-        {/* Checkbox Column */}
-        <td className="px-6 py-5">
-          <div className="flex justify-center gap-3">
-            {attacks.map((attack) => (
-              <label key={attack} className="flex flex-col items-center gap-1 cursor-pointer">
-                <input 
-                  type="checkbox" 
-                  className="w-4 h-4 rounded border-slate-700 bg-slate-900 text-blue-600 focus:ring-blue-500 focus:ring-offset-slate-900"
-                />
-                <span className="text-[8px] font-black text-slate-500 uppercase">{attack}</span>
-              </label>
-            ))}
-          </div>
-        </td>
-
-        <td className="px-6 py-5 italic text-slate-500 text-xs">{group.grade}</td>
-        <td className="px-6 py-5 text-right">
-          <button className="bg-blue-600/10 hover:bg-blue-600 text-blue-400 hover:text-white border border-blue-600/20 px-4 py-2 rounded-xl text-xs font-bold transition-all">
-            Review & Grade
-          </button>
-        </td>
-      </tr>
-    ))}
-  </tbody>
-</table>
+          </table>
         </div>
 
         {/* --- GRADING MODAL --- */}
@@ -169,32 +149,41 @@ const TADashboard = () => {
 
               <div className="mb-6">
                 <h2 className="text-2xl font-bold text-white">Grading Session</h2>
-                <p className="text-slate-400 text-sm">Reviewing: {selectedGroup.id} ({selectedGroup.lead})</p>
+                <p className="text-slate-400 text-sm">Reviewing: {selectedGroup.groupId} ({selectedGroup.lead})</p>
               </div>
 
               <form onSubmit={handleGradeSubmit} className="space-y-6">
                 <div>
                   <label className="block text-xs font-bold text-slate-400 mb-2 uppercase tracking-widest">Marks (0-100)</label>
-                  <input 
+                  <input
                     name="marks"
-                    required 
-                    type="number" 
+                    required
+                    type="number"
                     max="100"
                     min="0"
-                    placeholder="Enter score" 
-                    className="w-full bg-slate-800 border border-slate-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:ring-1 focus:ring-blue-500" 
+                    placeholder="Enter score"
+                    className="w-full bg-slate-800 border border-slate-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-400 mb-2 uppercase tracking-widest">Feedback (optional)</label>
+                  <textarea
+                    name="feedback"
+                    placeholder="Write feedback for the group..."
+                    className="w-full bg-slate-800 border border-slate-700 text-white rounded-xl px-4 py-3 focus:outline-none focus:ring-1 focus:ring-blue-500 h-20 resize-none text-sm"
                   />
                 </div>
 
                 <div className="flex gap-3">
-                  <button 
+                  <button
                     type="button"
                     onClick={() => setSelectedGroup(null)}
                     className="flex-1 bg-slate-800 hover:bg-slate-700 text-white font-bold py-3 rounded-xl transition-all text-sm"
                   >
                     Close
                   </button>
-                  <button 
+                  <button
                     type="submit"
                     className="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl transition-all shadow-lg shadow-blue-900/20 text-sm"
                   >
